@@ -3,6 +3,7 @@ from tkinter import *
 from PIL import Image, ImageTk
 from  ttkwidgets import *
 import mysql.connector
+from tkinter import messagebox
 
 
 
@@ -81,12 +82,17 @@ class page_inscription:
         connecter.commit()
         print(cursor.rowcount, "personne inscrite")
 
+        self.nom_entry.delete(0, END)
+        self.prenom_entry.delete(0, END)
+        self.email_entry.delete(0, END)
+        self.password_entry.delete(0, END)
+
 
         cursor.close()
         connecter.close()
 
 if connecter.is_connected:
-    print("connection réussi")
+    print("access à la base de donée")
     mon_inscription = page_inscription(root)
 
 
@@ -115,8 +121,10 @@ class connexion_page:
         self.nom_entry.place(x=100, y=100)
         self.password_label = Label(connexion_root, text="password", bg="grey", fg="white")
         self.password_label.place(x=100, y=130)
-        self.password_entry = Entry(connexion_root, width=48)
+        self.password_entry = Entry(connexion_root, width=48, show="*")
         self.password_entry.place(x=100, y=150)
+        
+        
 
         self.btn_connexion = Button(connexion_root, text="connexion", width=40, bg="blueviolet", fg="white", command=self.connexion_database)
         self.btn_connexion.place(x=100, y=200)
@@ -126,21 +134,40 @@ class connexion_page:
         password = self.password_entry.get()
 
         cursor = connecter.cursor()
-        sql = "SELECT nom AND password From connexion)"
+        sql = "SELECT * FROM inscription WHERE nom=%s AND password=%s"
         val = (nom, password)
         cursor.execute(sql, val)
-        connecter.commit()
-        print(cursor.rowcount, "personne connecter")
+        result = cursor.fetchone()
 
-
+        if result:
+            return accueil.open_accueil()
+            
+        else:
+            messagebox.showerror("Erreur", "Nom ou mot de passe incorrect")
+        
+        self.nom_entry.delete(0, END)
+        self.password_entry.delete(0, END)
         cursor.close()
-        connecter.close()
+
+    
+
 
 if connecter.is_connected:
     se_connecter = connexion_page(root)   
 #se_connecter.page_connexion()
 
+class page_accueil:
+    def __init__(self, master):
+        self.master = master
 
+    def open_accueil(self):
+        accueil_root = Toplevel(self.master)
+        accueil_root.geometry("500x650")
+        accueil_root.title("Accueil")
+        accueil_root.config(bg="grey")
+
+accueil = page_accueil(root)
+        
 
 
 
@@ -166,15 +193,6 @@ inscription.configure(bd=0)
 connexion = tkinter.Button(root, text="connexion", width=40, bg="blueviolet", fg="white", highlightthickness=0, command=se_connecter.open_login)
 connexion.place(x=105, y=550)
 connexion.configure(bd=0)
-
-
-
-
-
-
-
-
-
 
 
 
